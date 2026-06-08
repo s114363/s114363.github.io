@@ -2,10 +2,50 @@
 <html>
   <head>
     <meta charset = "utf-8">
-    <title>嗨嗨</title>
+    <title>番茄鐘</title>
     <link rel="icon" href="icon.png">
+    <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進階番茄鐘</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="timer-container">
+        <h1>🍅 進階番茄鐘</h1>
+        
+        <div class="settings">
+            <div class="input-group">
+                <label for="focus-input">專注 (分鐘)</label>
+                <input type="number" id="focus-input" value="25" min="1">
+            </div>
+            <div class="input-group">
+                <label for="break-input">休息 (分鐘)</label>
+                <input type="number" id="break-input" value="5" min="1">
+            </div>
+            <div class="input-group">
+                <label for="cycle-input">循環次數</label>
+                <input type="number" id="cycle-input" value="4" min="1">
+            </div>
+        </div>
+
+        <div class="status" id="status">準備開始</div>
+        <div class="cycle-count" id="cycle-count">目前循環：0 / 4</div>
+        <div class="timer" id="timer">25:00</div>
+        
+        <div class="controls">
+            <button id="start-btn">開始</button>
+            <button id="reset-btn">重設</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
   </head>
   <body>
-      hello world
+      
   </body>
 </html>
