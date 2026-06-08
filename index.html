@@ -239,7 +239,7 @@
 
     <div class="app-wrap">
         <div class="glass-panel class-timer">
-            <h1>🍅 時尚番茄鐘</h1>
+            <h1>🍅 番茄鐘/ᐠ｡ꞈ｡ᐟ\</h1>
             <div class="settings">
                 <div class="input-group">
                     <label for="focus-input">專注 (分)</label>
@@ -350,6 +350,38 @@
         startBtn.addEventListener('click', toggleTimer);
         resetBtn.addEventListener('click', resetTimer);
         resetTimer();
+        // === 新增：監聽輸入框的即時輸入事件 (input) ===
+
+// 1. 當調整專注時間時
+focusInput.addEventListener('input', () => {
+    // 只有在「沒在倒數」且「目前是專注模式」時，才即時連動大數字
+    if (!isCounting && isFocusMode) {
+        const val = parseInt(focusInput.value);
+        timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
+        updateDisplay();
+    }
+});
+
+// 2. 當調整休息時間時
+breakInput.addEventListener('input', () => {
+    // 只有在「沒在倒數」且「目前是休息模式」時，才即時連動大數字
+    if (!isCounting && !isFocusMode) {
+        const val = parseInt(breakInput.value);
+        timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
+        updateDisplay();
+    }
+});
+
+// 3. 當調整循環次數時
+cycleInput.addEventListener('input', () => {
+    if (!isCounting) {
+        const val = parseInt(cycleInput.value);
+        totalCycles = (isNaN(val) || val <= 0) ? 1 : val;
+        updateDisplay(); // 讓「目前循環：0 / X」的總次數即時改變
+    }
+});
+        
+    
 
         /* --- 待辦事項邏輯 --- */
         const todoInput = document.getElementById('todo-input');
