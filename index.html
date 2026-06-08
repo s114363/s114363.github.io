@@ -10,19 +10,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>進階番茄鐘</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; background-color: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .timer-container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); text-align: center; width: 350px; }
+        h1 { color: #e74c3c; margin-top: 0; }
+        .settings { display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .input-group { display: flex; flex-direction: column; align-items: center; width: 30%; }
+        .input-group label { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+        .status { font-size: 1.3rem; color: #e74c3c; font-weight: bold; }
+        .cycle-count { font-size: 0.9rem; color: #95a5a6; margin: 10px 0; }
+        .timer { font-size: 4.5rem; font-weight: bold; color: #2c3e50; margin-bottom: 25px; }
+        button { background-color: #e74c3c; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; margin: 0 10px; }
+        #reset-btn { background-color: #95a5a6; }
+    </style>
 </head>
 <body>
     <div class="timer-container">
         <h1>🍅 進階番茄鐘</h1>
-        
         <div class="settings">
             <div class="input-group">
-                <label for="focus-input">專注 (分鐘)</label>
+                <label for="focus-input">專注 (分)</label>
                 <input type="number" id="focus-input" value="25" min="1">
             </div>
             <div class="input-group">
-                <label for="break-input">休息 (分鐘)</label>
+                <label for="break-input">休息 (分)</label>
                 <input type="number" id="break-input" value="5" min="1">
             </div>
             <div class="input-group">
@@ -30,24 +42,82 @@
                 <input type="number" id="cycle-input" value="4" min="1">
             </div>
         </div>
-
         <div class="status" id="status">準備開始</div>
         <div class="cycle-count" id="cycle-count">目前循環：0 / 4</div>
         <div class="timer" id="timer">25:00</div>
-        
         <div class="controls">
             <button id="start-btn">開始</button>
             <button id="reset-btn">重設</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const statusDisplay = document.getElementById('status');
+        const cycleCountDisplay = document.getElementById('cycle-count');
+        const focusInput = document.getElementById('focus-input');
+        const breakInput = document.getElementById('break-input');
+        const cycleInput = document.getElementById('cycle-input');
+
+        let timerId = null; let timeLeft = 0; let isCounting = false; let isFocusMode = true; let currentCycle = 1; let totalCycles = 4;
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            cycleCountDisplay.textContent = `目前循環：${currentCycle} / ${totalCycles}`;
+        }
+
+        function setTimeForCurrentMode() {
+            if (isFocusMode) {
+                timeLeft = parseInt(focusInput.value) * 60;
+                statusDisplay.textContent = '專注時間';
+                statusDisplay.style.color = '#e74c3c';
+            } else {
+                timeLeft = parseInt(breakInput.value) * 60;
+                statusDisplay.textContent = '休息時間';
+                statusDisplay.style.color = '#27ae60';
+            }
+            updateDisplay();
+        }
+
+        function handleTimerComplete() {
+            clearInterval(timerId); isCounting = false; startBtn.textContent = '開始';
+            if (isFocusMode) {
+                if (currentCycle >= totalCycles) { alert('恭喜！你已經完成所有循環了！'); resetTimer(); return; } 
+                else { alert('專注時間結束，休息一下吧！'); isFocusMode = false; }
+            } else {
+                alert('休息結束，準備開始專注！'); isFocusMode = true; currentCycle++;
+            }
+            setTimeForCurrentMode();
+        }
+
+        function toggleTimer() {
+            if (focusInput.value <= 0 || breakInput.value <= 0 || cycleInput.value <= 0) { alert("請輸入大於 0 的數字喔！"); return; }
+            if (isCounting) {
+                clearInterval(timerId); startBtn.textContent = '繼續'; isCounting = false;
+            } else {
+                totalCycles = parseInt(cycleInput.value);
+                if (timeLeft === 0 && !timerId) { setTimeForCurrentMode(); }
+                isCounting = true; startBtn.textContent = '暫停';
+                focusInput.disabled = breakInput.disabled = cycleInput.disabled = true;
+                timerId = setInterval(() => { timeLeft--; updateDisplay(); if (timeLeft <= 0) { handleTimerComplete(); } }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerId); timerId = null; isCounting = false; isFocusMode = true; currentCycle = 1;
+            totalCycles = parseInt(cycleInput.value);
+            focusInput.disabled = breakInput.disabled = cycleInput.disabled = false;
+            statusDisplay.textContent = '準備開始'; statusDisplay.style.color = '#e74c3c'; startBtn.textContent = '開始';
+            setTimeForCurrentMode();
+        }
+
+        startBtn.addEventListener('click', toggleTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        resetTimer();
+    </script>
 </body>
-</html>
-</body>
-</html>
-  </head>
-  <body>
-      
-  </body>
 </html>
