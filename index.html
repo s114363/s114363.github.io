@@ -23,16 +23,17 @@
             background-color: #b4c7d8; /* 休息時的粉藍灰 */
         }
 
-        /* 外層包裝：負責讓番茄鐘與待辦事項並排 */
+        /* 外層包裝：負責讓各個面板並排 */
         .app-wrap {
             display: flex;
             gap: 30px;
             flex-wrap: wrap; /* 螢幕太小時會自動變成上下排列 */
             justify-content: center;
             align-items: flex-start;
+            max-width: 1200px;
         }
 
-        /* 共用毛玻璃面板樣式（確保兩格結構大小完全相同） */
+        /* 共用毛玻璃面板樣式 */
         .glass-panel {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(15px);
@@ -44,7 +45,7 @@
             text-align: center;
             width: 360px;
             box-sizing: border-box;
-            min-height: 500px; /* 固定最小高度，確保兩邊等高對齊 */
+            min-height: 500px; /* 固定最小高度，確保等高對齊 */
             display: flex;
             flex-direction: column;
         }
@@ -94,10 +95,7 @@
             outline: none;
         }
 
-        .input-group input:focus {
-            background: rgba(255, 255, 255, 0.9);
-        }
-
+        .input-group input:focus { background: rgba(255, 255, 255, 0.9); }
         .input-group input:disabled { opacity: 0.3; }
 
         .status { font-size: 1.3rem; font-weight: 600; color: #2d3748; }
@@ -112,7 +110,7 @@
             padding-bottom: 20px;
         }
 
-        /* ==================== 待辦事項專屬樣式 ==================== */
+        /* ==================== 待辦與紀錄共用列表區 ==================== */
         .todo-input-group {
             display: flex;
             gap: 10px;
@@ -130,21 +128,21 @@
             outline: none;
         }
 
-        .todo-list-container {
+        .list-container {
             flex: 1;
-            overflow-y: auto; /* 東西太多時會出現內部捲軸 */
+            overflow-y: auto;
             max-height: 320px;
             padding-right: 5px;
         }
 
-        .todo-list {
+        .custom-list {
             list-style: none;
             padding: 0;
             margin: 0;
             text-align: left;
         }
 
-        .todo-item {
+        .list-item {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -155,15 +153,15 @@
             transition: all 0.3s ease;
         }
 
-        /* 勾選方塊樣式 */
-        .todo-item input[type="checkbox"] {
+        /* 待辦事項樣式 */
+        .list-item input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
-            accent-color: #2d3748; /* 勾選後的顏色 */
+            accent-color: #2d3748;
         }
 
-        .todo-item span {
+        .list-item span {
             flex: 1;
             color: #2d3748;
             font-size: 0.95rem;
@@ -171,17 +169,22 @@
             transition: all 0.3s;
         }
 
-        /* 🎯 關鍵：勾選完成後的劃掉效果與淡出樣式 */
-        .todo-item.completed {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .todo-item.completed span {
-            text-decoration: line-through; /* 劃掉線 */
+        .list-item.completed { background: rgba(255, 255, 255, 0.05); }
+        .list-item.completed span {
+            text-decoration: line-through;
             color: #718096;
             opacity: 0.5;
         }
 
-        /* 刪除按鈕 (X) */
+        /* 紀錄項目樣式 */
+        .history-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .history-date { font-size: 0.8rem; color: #4a5568; font-weight: bold; }
+        .history-detail { font-size: 0.95rem; color: #2d3748; }
+
         .delete-btn {
             background: none !important;
             border: none !important;
@@ -202,7 +205,7 @@
         .controls {
             display: flex;
             justify-content: center;
-            margin-top: auto; /* 確保按鈕永遠貼在卡片底部 */
+            margin-top: auto;
         }
 
         button {
@@ -219,20 +222,23 @@
             transition: all 0.2s ease;
         }
 
-        button:hover {
-            background-color: #1a202c;
-            transform: translateY(-1px);
-        }
+        button:hover { background-color: #1a202c; transform: translateY(-1px); }
 
-        #reset-btn {
+        .secondary-btn {
             background-color: rgba(255, 255, 255, 0.4);
             color: #2d3748;
             box-shadow: none;
         }
-
-        #reset-btn:hover { background-color: rgba(255, 255, 255, 0.7); }
+        .secondary-btn:hover { background-color: rgba(255, 255, 255, 0.7); }
         
         #add-todo-btn { padding: 12px 20px; border-radius: 12px; margin: 0; }
+        #clear-history-btn { background-color: rgba(229, 62, 62, 0.2); color: #e53e3e; }
+        #clear-history-btn:hover { background-color: rgba(229, 62, 62, 0.4); }
+
+        /* 讓捲軸漂亮一點 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.5); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -259,7 +265,7 @@
             <div class="timer" id="timer">25:00</div>
             <div class="controls">
                 <button id="start-btn">開始</button>
-                <button id="reset-btn">重設</button>
+                <button id="reset-btn" class="secondary-btn">重設</button>
             </div>
         </div>
 
@@ -269,9 +275,9 @@
                 <input type="text" id="todo-input" placeholder="新增下一個任務..." maxlength="30">
                 <button id="add-todo-btn">新增</button>
             </div>
-            <div class="todo-list-container">
-                <ul class="todo-list" id="todo-list">
-                    <div class="todo-item">
+            <div class="list-container">
+                <ul class="custom-list" id="todo-list">
+                    <div class="list-item">
                         <input type="checkbox" onchange="toggleTask(this)">
                         <span>寫出番茄鐘網頁 💻</span>
                         <button class="delete-btn" onclick="deleteTask(this)">×</button>
@@ -279,9 +285,75 @@
                 </ul>
             </div>
         </div>
+
+        <div class="glass-panel class-history">
+            <h1>🗓️專注紀錄</h1>
+            <div class="list-container">
+                <ul class="custom-list" id="history-list">
+                    </ul>
+            </div>
+            <div class="controls">
+                <button id="clear-history-btn" class="secondary-btn">清空紀錄</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        /* --- 專注紀錄邏輯 (新增) --- */
+        const historyList = document.getElementById('history-list');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        let sessionStartTime = null; // 用來記錄每次專注開始的時間
+
+        // 從 LocalStorage 載入歷史紀錄
+        function loadHistory() {
+            const records = JSON.parse(localStorage.getItem('pomodoro_records')) || [];
+            historyList.innerHTML = ''; // 清空列表
+            
+            if (records.length === 0) {
+                historyList.innerHTML = '<div style="color: #718096; margin-top: 20px; text-align: center;">尚未有紀錄，開始專注吧！</div>';
+                return;
+            }
+
+            // 倒序排列，讓最新紀錄在最上面
+            records.reverse().forEach(record => {
+                const li = document.createElement('div');
+                li.className = 'list-item history-item';
+                li.innerHTML = `
+                    <div class="history-date">📅 ${record.date}</div>
+                    <div class="history-detail">🎯 ${record.startTime} ~ ${record.endTime} (${record.duration} 分鐘)</div>
+                `;
+                historyList.appendChild(li);
+            });
+        }
+
+        // 儲存紀錄到 LocalStorage
+        function saveHistory(start, end, duration) {
+            const records = JSON.parse(localStorage.getItem('pomodoro_records')) || [];
+            
+            // 格式化時間
+            const dateStr = start.toLocaleDateString('zh-TW');
+            const startTimeStr = start.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+            const endTimeStr = end.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+
+            records.push({
+                date: dateStr,
+                startTime: startTimeStr,
+                endTime: endTimeStr,
+                duration: duration
+            });
+
+            localStorage.setItem('pomodoro_records', JSON.stringify(records));
+            loadHistory(); // 更新畫面
+        }
+
+        // 清空紀錄
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('確定要清空所有讀書紀錄嗎？')) {
+                localStorage.removeItem('pomodoro_records');
+                loadHistory();
+            }
+        });
+
         /* --- 番茄鐘邏輯 --- */
         const timerDisplay = document.getElementById('timer');
         const startBtn = document.getElementById('start-btn');
@@ -316,11 +388,25 @@
 
         function handleTimerComplete() {
             clearInterval(timerId); isCounting = false; startBtn.textContent = '開始';
+            
             if (isFocusMode) {
-                if (currentCycle >= totalCycles) { alert('恭喜！你已經完成所有循環了！'); resetTimer(); return; } 
-                else { alert('專注時間結束，休息一下吧！'); isFocusMode = false; }
+                // 🔔 專注完成，儲存紀錄！
+                const sessionEndTime = new Date();
+                saveHistory(sessionStartTime, sessionEndTime, parseInt(focusInput.value));
+                sessionStartTime = null; // 重置開始時間
+
+                if (currentCycle >= totalCycles) { 
+                    alert('恭喜！你已經完成所有循環了！'); 
+                    resetTimer(); 
+                    return; 
+                } else { 
+                    alert('專注時間結束，休息一下吧！'); 
+                    isFocusMode = false; 
+                }
             } else {
-                alert('休息結束，準備開始專注！'); isFocusMode = true; currentCycle++;
+                alert('休息結束，準備開始專注！'); 
+                isFocusMode = true; 
+                currentCycle++;
             }
             setTimeForCurrentMode();
         }
@@ -332,9 +418,19 @@
             } else {
                 totalCycles = parseInt(cycleInput.value);
                 if (timeLeft === 0 && !timerId) { setTimeForCurrentMode(); }
+                
+                // 🔔 紀錄專注開始時間 (只在專注模式且尚未記錄時觸發)
+                if (isFocusMode && !sessionStartTime) {
+                    sessionStartTime = new Date();
+                }
+
                 isCounting = true; startBtn.textContent = '暫停';
                 focusInput.disabled = breakInput.disabled = cycleInput.disabled = true;
-                timerId = setInterval(() => { timeLeft--; updateDisplay(); if (timeLeft <= 0) { handleTimerComplete(); } }, 1000);
+                timerId = setInterval(() => { 
+                    timeLeft--; 
+                    updateDisplay(); 
+                    if (timeLeft <= 0) { handleTimerComplete(); } 
+                }, 1000);
             }
         }
 
@@ -344,58 +440,49 @@
             focusInput.disabled = breakInput.disabled = cycleInput.disabled = false;
             statusDisplay.textContent = '準備開始'; startBtn.textContent = '開始';
             document.body.classList.remove('break-mode');
+            sessionStartTime = null; // 重設時也清掉尚未完成的開始時間
             setTimeForCurrentMode();
         }
 
         startBtn.addEventListener('click', toggleTimer);
         resetBtn.addEventListener('click', resetTimer);
-        resetTimer();
-        // === 新增：監聽輸入框的即時輸入事件 (input) ===
-
-// 1. 當調整專注時間時
-focusInput.addEventListener('input', () => {
-    // 只有在「沒在倒數」且「目前是專注模式」時，才即時連動大數字
-    if (!isCounting && isFocusMode) {
-        const val = parseInt(focusInput.value);
-        timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
-        updateDisplay();
-    }
-});
-
-// 2. 當調整休息時間時
-breakInput.addEventListener('input', () => {
-    // 只有在「沒在倒數」且「目前是休息模式」時，才即時連動大數字
-    if (!isCounting && !isFocusMode) {
-        const val = parseInt(breakInput.value);
-        timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
-        updateDisplay();
-    }
-});
-
-// 3. 當調整循環次數時
-cycleInput.addEventListener('input', () => {
-    if (!isCounting) {
-        const val = parseInt(cycleInput.value);
-        totalCycles = (isNaN(val) || val <= 0) ? 1 : val;
-        updateDisplay(); // 讓「目前循環：0 / X」的總次數即時改變
-    }
-});
         
-    
+        // 監聽輸入框的即時輸入事件 (input)
+        focusInput.addEventListener('input', () => {
+            if (!isCounting && isFocusMode) {
+                const val = parseInt(focusInput.value);
+                timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
+                updateDisplay();
+            }
+        });
+
+        breakInput.addEventListener('input', () => {
+            if (!isCounting && !isFocusMode) {
+                const val = parseInt(breakInput.value);
+                timeLeft = (isNaN(val) || val <= 0) ? 0 : val * 60;
+                updateDisplay();
+            }
+        });
+
+        cycleInput.addEventListener('input', () => {
+            if (!isCounting) {
+                const val = parseInt(cycleInput.value);
+                totalCycles = (isNaN(val) || val <= 0) ? 1 : val;
+                updateDisplay(); 
+            }
+        });
 
         /* --- 待辦事項邏輯 --- */
         const todoInput = document.getElementById('todo-input');
         const addTodoBtn = document.getElementById('add-todo-btn');
         const todoList = document.getElementById('todo-list');
 
-        // 新增項目的功能
         function addTodo() {
             const taskText = todoInput.value.trim();
-            if (taskText === "") return; // 如果沒輸入字，直接跳過
+            if (taskText === "") return; 
 
-            // 建立新的 todo 項目結構
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'todo-item';
+            itemDiv.className = 'list-item';
             itemDiv.innerHTML = `
                 <input type="checkbox" onchange="toggleTask(this)">
                 <span>${taskText}</span>
@@ -403,13 +490,12 @@ cycleInput.addEventListener('input', () => {
             `;
 
             todoList.appendChild(itemDiv);
-            todoInput.value = ""; // 清空輸入框
+            todoInput.value = ""; 
             
-            // 自動滾動到最底部
-            document.querySelector('.todo-list-container').scrollTop = todoList.scrollHeight;
+            // 抓取包含列表的父元素來滾動
+            todoList.parentElement.scrollTop = todoList.parentElement.scrollHeight;
         }
 
-        // 勾選/取消勾選時觸發（切換 CSS 劃掉效果）
         function toggleTask(checkbox) {
             const itemDiv = checkbox.parentElement;
             if (checkbox.checked) {
@@ -419,19 +505,21 @@ cycleInput.addEventListener('input', () => {
             }
         }
 
-        // 刪除項目功能
         function deleteTask(button) {
             const itemDiv = button.parentElement;
             itemDiv.remove();
         }
 
-        // 綁定點擊按鈕與按下 Enter 鍵事件
         addTodoBtn.addEventListener('click', addTodo);
         todoInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addTodo();
             }
         });
+
+        // 頁面載入時初始化
+        resetTimer();
+        loadHistory();
     </script>
 </body>
 </html>
